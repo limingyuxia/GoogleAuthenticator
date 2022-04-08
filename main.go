@@ -21,6 +21,25 @@ func main() {
 	user = make(map[string]string)
 	r := gin.Default()
 
+	r.GET("/googleAuth/secret", func(ctx *gin.Context) {
+		userName, ok := ctx.GetQuery("userName")
+		if !ok {
+			ctx.JSON(http.StatusBadRequest, "username not found")
+			return
+		}
+
+		secret := ""
+		if userSecret, ok := user[userName]; ok {
+			secret = userSecret
+		} else {
+			// 生成用户绑定秘钥
+			secret = GetSecret()
+			user[userName] = secret
+		}
+
+		ctx.JSON(http.StatusOK, secret)
+	})
+
 	r.GET("/googleAuth/get", func(ctx *gin.Context) {
 		userName, ok := ctx.GetQuery("userName")
 		if !ok {
